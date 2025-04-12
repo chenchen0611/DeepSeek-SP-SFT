@@ -58,13 +58,15 @@ def read_args(args: Optional[Union[dict[str, Any], list[str]]] = None) -> Union[
     r"""Get arguments from the command line or a config file."""
     if args is not None:
         return args
-
-    if len(sys.argv) == 2 and (sys.argv[1].endswith(".yaml") or sys.argv[1].endswith(".yml")):
-        return yaml.safe_load(Path(sys.argv[1]).absolute().read_text())
-    elif len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
-        return json.loads(Path(sys.argv[1]).absolute().read_text())
-    else:
-        return sys.argv[1:]
+    for arg in sys.argv:
+        if arg.endswith("yaml"):
+            return yaml.safe_load(Path(arg).absolute().read_text())
+    # if len(sys.argv) == 2 and (sys.argv[1].endswith(".yaml") or sys.argv[1].endswith(".yml")):
+    #     return yaml.safe_load(Path(sys.argv[1]).absolute().read_text())
+    # elif len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
+    #     return json.loads(Path(sys.argv[1]).absolute().read_text())
+    # else:
+    #     return sys.argv[1:]
 
 
 def _parse_args(

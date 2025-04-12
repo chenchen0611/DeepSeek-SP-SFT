@@ -23,10 +23,12 @@ class SequenceParallelPaddingProcessor(SequenceParallelProcessor):
         Pad sequence
         """
         max_length = self.data_args.cutoff_len
+        model_type = self.data_args.template
         input_pad_token_id = self.tokenizer.pad_token_id
         assert self.data_args.ignore_pad_token_for_loss
         label_pad_token_id = IGNORE_INDEX if self.data_args.ignore_pad_token_for_loss else self.tokenizer.pad_token_id
-
+        import torch
+        print(f"[RANK {torch.distributed.get_rank()}] model_type = {model_type}, sequence_parallel_size = {self.model_args.sequence_parallel_size}")
         for k, v in examples.items():
             if k.endswith("input_ids"):
                 pad_token_id = input_pad_token_id
@@ -38,7 +40,8 @@ class SequenceParallelPaddingProcessor(SequenceParallelProcessor):
             elif k.endswith("attention_mask"):
                 pad_token_id = 0
             elif k.endswith("position_ids"):
-                pad_token_id = max_length - 1  # pad the max position id
+                # pad_token_id = max_length - 1  # pad the max position id
+                pad_token_id = max_length - 1  if "deepseek" not in model_type else (max_length // self.model_args.sequence_parallel_size) - 1  # pad the max position id 适配deepseek的apply_rotary_pos_emb
             elif k == "images" or k == "videos" or k == "audios":
                 pad_token_id = -1
                 continue  # TODO: haven't tested multi-modal yet

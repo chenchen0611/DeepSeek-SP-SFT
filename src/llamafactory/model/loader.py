@@ -135,7 +135,6 @@ def load_model(
         config.attention_dropout = 0.0
 
     apply_liger_kernel(config, model_args, is_trainable, require_logits=(finetuning_args.stage not in ["pt", "sft"]))
-    sequence_parallel_group = apply_sequence_parallel(model_args, full_determinism)  # monkey patching, similar to liger_kernel
 
     model = None
     lazy_load = False
@@ -213,6 +212,6 @@ def load_model(
     if model_args.print_param_status and int(os.getenv("LOCAL_RANK", "0")) == 0:
         for name, param in model.named_parameters():
             print(f"name: {name}, dtype: {param.dtype}, device: {param.device}, trainable: {param.requires_grad}")
-
+    sequence_parallel_group = apply_sequence_parallel(model, model_args, full_determinism)  # monkey patching, similar to liger_kernel
     model.sequence_parallel_group = sequence_parallel_group
     return model
