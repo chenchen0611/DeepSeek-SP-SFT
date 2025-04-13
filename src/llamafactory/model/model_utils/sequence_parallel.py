@@ -54,7 +54,7 @@ def init_sp_group(sp_size):
     return sp_groups[sp_idx]
 
 
-def apply_sequence_parallel(model_args, full_determinism=False):
+def apply_sequence_parallel(model, model_args, full_determinism=False):
     if model_args.sequence_parallel_size == 1:
         return None  # no sequence parallelism
 
